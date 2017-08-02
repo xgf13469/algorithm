@@ -15,6 +15,9 @@ int Astar::calG(Point *temp_start, Point *point)
 
 int Astar::calH(Point *point, Point *end)
 {
+	//曼哈顿距离计算H
+	return kCost1*(abs(end->x - point->x) + abs(end->y - point->y));
+	
 	//用简单的欧几里得距离计算H，这个H的计算是关键，还有很多算法
 	return sqrt((double)(end->x - point->x)*(double)(end->x - point->x) + (double)(end->y - point->y)*(double)(end->y - point->y))*kCost1;
 }
