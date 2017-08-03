@@ -21,18 +21,13 @@ int G[MAXNUM][MAXNUM] = {
 class Floyd
 {
 public:
-	int A[MAXNUM][MAXNUM];
 	int path[MAXNUM][MAXNUM];
 	void solve(int v0)
 	{
 		for (int i = 0; i < MAXNUM; ++i)
-		{
 			for (int j = 0; j < MAXNUM; ++j)
-			{
-				A[i][j] = G[i][j];
 				path[i][j] = j;
-			}
-		}
+
 		for (int k = 0; k < MAXNUM; ++k)
 		{
 			for (int i = 0; i < MAXNUM; ++i)
@@ -46,6 +41,25 @@ public:
 					}
 				}
 			}
+		}
+	}
+	
+	void getPath(int v0)
+	{
+		solve(v0);
+
+		//输出最短路径。同样是反向的！！！
+		for (int i = 0; i < MAXNUM; ++i)
+		{
+			cout << v0 << " -> " << i << " min distance: " << dist[i];
+			cout << ",  path: " << i << " <- ";
+			int p = path[i][v0];
+			while (p != v0)
+			{
+				cout << p << " <- ";
+				p = path[p][v0];
+			}
+			cout << v0 << endl;
 		}
 	}
 };
@@ -63,22 +77,7 @@ int main()
 
 	int s = 0;		//起点
 	Floyd f;
-	f.solve(s);
-	cout << "Floyd：" << endl;
-	for (int i = 0; i < 7; ++i)
-	{
-		cout << s + 1 << " -> " << i + 1 << " min distance: " << dist[i];
-		cout << ",  path: " << i + 1 << " <- ";
-		int p = f.path[i][s];
-		while (p != s)
-		{
-			cout << p + 1 << " <- ";
-			p = f.path[p][s];
-		}
-		cout << s + 1 << endl;
-	}
-
-	cout <<endl;
+	f.getPath(s);
 	
 	return 0;
 }

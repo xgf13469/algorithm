@@ -29,14 +29,11 @@ public:
 		{
 			dist[i] = G[v0][i];
 			s[i] = false;
+			
 			if (dist[i] == MAXINT)
-			{
 				pre[i] = -1;
-			}
 			else
-			{
 				pre[i] = v0;
-			}
 		}
 
 		dist[v0] = 0;
@@ -45,15 +42,16 @@ public:
 		{
 			int mindist = MAXINT;
 			int u = v0;
-			for (int j = 0; j < MAXNUM;++j)
+			for (int j = 0; j < MAXNUM; ++j)
 				if (!s[j] && dist[j] < mindist)
 				{
 					u = j;
 					mindist = dist[j];
 				}
+		
 			s[u] = true;
 
-			for (int j = 0; j < MAXNUM;++j)
+			for (int j = 0; j < MAXNUM; ++j)
 				if (!s[j] && G[u][j] < MAXINT)
 				{
 					if (dist[u] + G[u][j] < dist[j])
@@ -64,7 +62,25 @@ public:
 				}
 		}
 	}
+	
+	void getPath(int v0)
+	{
+		solve(v0);
 
+		//输出v0到其他所有节点的最短路径。注意：输出顺序是反向的！！！
+		for (int i = 0; i < MAXNUM; ++i)
+		{
+			cout << v0 << " -> " << i << " min distance: " << dist[i];
+			cout << ",  path: " << i << " <- ";
+			int p = pre[i];
+			while (p != v0)
+			{
+				cout << p << " <- ";
+				p = pre[p];
+			}
+			cout << v0 << endl;
+		}
+	}
 };
 
 int main()
@@ -80,21 +96,7 @@ int main()
 
 	int s = 0;		//起点
 	Dijkstra d;
-	d.solve(s);
-	
-	cout << "Dijkstra:" << endl;
-	for (int i = 0; i < 7; ++i)
-	{
-		cout << s + 1 << " -> " << i + 1 << " min distance: " << dist[i];
-		cout << ",  path: " << i+1 << " <- ";
-		int p = pre[i];
-		while (p != s)
-		{
-			cout << p + 1 << " <- ";
-			p = pre[p];
-		}
-		cout << s + 1 << endl;
-	}
+	d.getPath(s);
 
 	return 0;
 }
