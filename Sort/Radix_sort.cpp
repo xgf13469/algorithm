@@ -5,8 +5,6 @@
 
 using namespace std;
 
-//基数排序LSD:先地位后高位
-
 /********************************************************
 *函数名称：GetNumInPos
 *参数说明：num 一个整形数据
@@ -23,6 +21,7 @@ int GetNumInPos(int num, int pos)
 }
 
 #define MAXPOS 10    //最高位的位数
+
 
 //LSD:从个位开始到最高位数
 void Radix_sort(vector<int> &A)
@@ -49,6 +48,7 @@ void Radix_sort(vector<int> &A)
 	}
 }
 
+
 //MSD:从最高位开始到个位
 void RadixSort(vector<int> &A, int d)
 {
@@ -63,7 +63,7 @@ void RadixSort(vector<int> &A, int d)
 			int num = GetNumInPos(A[i], d);
 			radixArray[num].push_back(A[i]);
 		}
-		cout << endl;
+
 		for (int i = 0, j = 0; i < 10; i++)    //收集
 		{
 			RadixSort(radixArray[i], d-1);		//递归，对子桶从次高位开始分配
