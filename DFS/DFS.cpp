@@ -1,5 +1,5 @@
 #include <vector>
-#include <queue>
+#include <stack>
 #include <iostream>
 
 using namespace std;
@@ -10,7 +10,7 @@ struct Node
 	int y;
 	int visitType;
 	Node *pre;
-	Node(int _x, int _y) :x(_x), y(_y),visitType(0), pre(NULL){}
+	Node(int _x, int _y) :x(_x), y(_y), visitType(0), pre(NULL){}
 };
 
 class Maze
@@ -20,13 +20,12 @@ public:
 	vector<Node*> GetPath(Node &start, Node &finish);
 private:
 	vector<vector<int>> maze;		//地图
-
+	stack<Node *> Stack;			//递归中保存每层节点
 	vector<Node*> visited;			//保存被访问过的节点
-	queue<Node*> frontQueue;		//前向访问队列
-	queue<Node*> backQueue;		//反向访问队列
+	
 	vector<Node*> path;			//到达终点的路径
 
-	void search(queue<Node*> &);		//搜索队列中节点的相邻节点
+	void DFS(Node &finish);		//搜索队列中节点的相邻节点
 	bool isValid(const Node *);			//节点是否有效：是否在地图中；是否有障碍
 	vector<Node*> GetAround(const Node *);			//获取指定节点周围的可行节点
 	Node *isVisited(Node *);			//判断节点是否被访问过：是返回该节点，否返回NULL
@@ -35,68 +34,48 @@ private:
 vector<Node*> Maze::GetPath(Node &start, Node &finish)
 {
 	start.visitType = 1;
-	finish.visitType = 2;
-
-	frontQueue.push(&start);
-	backQueue.push(&finish);
-
+	Stack.push(&start);
 	visited.push_back(&start);
-	visited.push_back(&finish);
 
-	while (!frontQueue.empty() && !backQueue.empty())
-	{
-		if (frontQueue.size() < backQueue.size())
-			search(frontQueue);		//前向搜索
-		else
-			search(backQueue);		//后向搜索
+	DFS(finish);
 
-		if (!path.empty())
-			break;
-	}
 	return path;
 }
 
-void Maze::search(queue<Node*> &que)
+void Maze::DFS(Node &finish)
 {
-	int n = que.size();		//遍历这个层次的所有节点
-	for (int i = 0; i < n; i++)
+	Node *cur = Stack.top();
+	if (cur->x == finish.x && cur->y == finish.y)		
 	{
-		Node *cur = que.front();		//从队列中弹出当前搜索的点
-		que.pop();
-
-		vector<Node*> around = GetAround(cur);		//搜索节点周围可行的节点
-
-		for (auto &node : around)
+		//当前节点与终点相等时，插入路径并返回
+		while (cur)
 		{
-			if (node->visitType==cur->visitType)
-				continue;
-			else if (node->visitType==0)
-			{
-				node->visitType=cur->visitType;
-				node->pre = cur;
-				que.push(node);
-				visited.push_back(node);
-			}
+			path.insert(path.begin(),cur);
+			cur = cur->pre;
+		}
+		return;
+	}
+	auto around = GetAround(cur);		//获取当前节点的相邻节点
+	for (auto &node : around)
+	{
+		//对每个相邻节点：设置标志，放入栈中，然后递归
+		if (!node->visitType)
+		{
+			node->visitType = 1;
+			node->pre = cur;
+			Stack.push(node);
+			visited.push_back(node);
 
-			//另一个方向访问过的节点与当前节点相邻
+			DFS(finish);
+
+			//如果返回时找到路径（path不为空），则返回；如果未找到，弹出刚刚加入的节点，并设置节点为为访问（类似回溯）
+			if (!path.empty())
+				return;
 			else
 			{
-				//cur 和 node 为两个方向的相邻节点
-				if (cur->visitType == 2)
-					swap(cur, node);
-
-				//保存路径
-				while (cur)
-				{
-					path.insert(path.begin(), cur);
-					cur = cur->pre;
-				}
-				while (node)
-				{
-					path.push_back(node);
-					node = node->pre;
-				}
-				return;
+				Stack.pop();
+				visited.pop_back();
+				node->visitType = 0;
 			}
 		}
 	}
@@ -141,15 +120,15 @@ int main()
 {
 	vector<vector<int>> maze = {
 		{ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-		{ 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1 },
-		{ 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0 },
-		{ 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0 },
-		{ 1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0 },
+		{ 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1 },
+		{ 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0 },
+		{ 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0 },
+		{ 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0 },
 		{ 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0 },
 		{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 },
 		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 }
 	};
-	
+
 	Node start(0, 0);
 	Node finish(7, 11);
 	Maze m(maze);
