@@ -8,37 +8,34 @@ struct Node
 {
 	int x;
 	int y;
+	int visitType;
 	Node *pre;
-	Node(int _x, int _y) :x(_x), y(_y), pre(NULL){}
+	Node(int _x, int _y) :x(_x), y(_y),visitType(0), pre(NULL){}
 };
+
 class Maze
 {
 public:
-	Maze(vector<vector<int>> _maze) :maze(_maze), visitType(vector<vector<int>>(_maze.size(), vector<int>(_maze[0].size(), 0))){}
+	Maze(vector<vector<int>> _maze) :maze(_maze){}
 	vector<Node*> GetPath(Node &start, Node &finish);
 private:
 	vector<vector<int>> maze;		//地图
-	vector<vector<int>> visitType;		//节点被访问的类型：0未被访问，1被正向搜索访问过，2被反向搜索访问过
 
-	vector<Node*> visited;			//已被访问过的节点
+	vector<Node*> visited;			//保存被访问过的节点
 	queue<Node*> frontQueue;		//前向访问队列
 	queue<Node*> backQueue;		//反向访问队列
-
 	vector<Node*> path;			//到达终点的路径
 
-	//双向扩展
-	void search(queue<Node*> &);
-	//节点可行性
-	bool isValid(const Node *);
-	//获取指定节点周围的可行节点
-	vector<Node*> GetAround(const Node *);
-	Node *isVisited(Node *);
+	void search(queue<Node*> &);		//搜索队列中节点的相邻节点
+	bool isValid(const Node *);			//节点是否有效：是否在地图中；是否有障碍
+	vector<Node*> GetAround(const Node *);			//获取指定节点周围的可行节点
+	Node *isVisited(Node *);			//判断节点是否被访问过：是返回该节点，否返回NULL
 };
 
 vector<Node*> Maze::GetPath(Node &start, Node &finish)
 {
-	visitType[start.x][start.y] = 1;
-	visitType[finish.x][finish.y] = 2;
+	start.visitType = 1;
+	finish.visitType = 2;
 
 	frontQueue.push(&start);
 	backQueue.push(&finish);
@@ -71,11 +68,11 @@ void Maze::search(queue<Node*> &que)
 
 		for (auto &node : around)
 		{
-			if (visitType[node->x][node->y] == visitType[cur->x][cur->y])
+			if (node->visitType==cur->visitType)
 				continue;
-			else if (visitType[node->x][node->y] == 0)
+			else if (node->visitType==0)
 			{
-				visitType[node->x][node->y] = visitType[cur->x][cur->y];
+				node->visitType=cur->visitType;
 				node->pre = cur;
 				que.push(node);
 				visited.push_back(node);
@@ -85,8 +82,10 @@ void Maze::search(queue<Node*> &que)
 			else
 			{
 				//cur 和 node 为两个方向的相邻节点
-				if (visitType[cur->x][cur->y] == 2)
+				if (cur->visitType == 2)
 					swap(cur, node);
+
+				//保存路径
 				while (cur)
 				{
 					path.insert(path.begin(), cur);
@@ -128,7 +127,6 @@ vector<Node*> Maze::GetAround(const Node *node)
 	}
 	return around;
 }
-
 Node *Maze::isVisited(Node *node)
 {
 	for (auto &it : visited)
@@ -138,6 +136,7 @@ Node *Maze::isVisited(Node *node)
 	}
 	return NULL;
 }
+
 int main()
 {
 	vector<vector<int>> maze = {
@@ -145,9 +144,9 @@ int main()
 		{ 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1 },
 		{ 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0 },
 		{ 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0 },
-		{ 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0 },
+		{ 1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0 },
 		{ 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0 },
-		{ 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0 },
+		{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 },
 		{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 }
 	};
 	
