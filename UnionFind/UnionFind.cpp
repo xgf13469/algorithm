@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 using namespace std;
 
 
@@ -39,32 +40,30 @@ void UnionSet(int x, int y)
 	}
 }
 
-//根节点
-int roots[MAX];
-
 int main(){
-	int m,n;
-	cin >> m >> n;	//m个对象，n对关系
+	int m, n;
+	cin >> n >> m;	//n个对象，m条关系
 
-	//初始化m个对象
-	for (int i = 1; i <= m; i++)
+	//初始化n个对象
+	for (int i = 1; i <= n; i++)
 		MakeSet(i);
-		
-	//输入n对关系
+
+	//输入m对关系
 	int x, y;
-	for (int i = 1; i <= n; i++){
+	for (int i = 1; i <= m; i++){
 		cin >> x >> y;
 		UnionSet(x, y);
 	}
 
 	//统计连通图的个数
-	for (int i = 1; i <= m; i++){
-		roots[FindSet(i)] = 1;
-	}
 	int cnt = 0;
-	for (int i = 0; i <= m; i++){
-		if (roots[i])
+	int roots[MAX] = { 0 };
+	for (int i = 1; i <= n; i++){
+		int t = FindSet(i);
+		if (!roots[t]){
+			roots[t] = 1;
 			cnt++;
+		}
 	}
 	cout << "union blocks: " << cnt << endl;
 
